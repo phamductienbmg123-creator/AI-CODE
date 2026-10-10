@@ -11,7 +11,7 @@ CORS(app)
 
 # ---- CONFIG: đặt bằng biến môi trường, đừng dán key thẳng vào file ----
 AI_API_URL = os.environ.get("AI_API_URL", "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions")
-AI_API_KEY = os.environ.get("AI_API_KEY", "")
+AI_API_KEY = os.environ.get("AI_API_KEY", "AQ.Ab8RN6I7cpLzaperNxbEsP9GkO6ILbVH2D_jmKSOHK8qiVzFQw")
 AI_MODEL = os.environ.get("AI_MODEL", "gemini-3.8-flash")
 ACCESS_CODE = os.environ.get("ACCESS_CODE", "")  # mật khẩu vào web (để trống = ai cũng dùng được)
 
