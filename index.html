@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Rin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+<style>
+/* Bố cục: một màn hình chat kiểu ứng dụng. Nền đêm chàm có hai quầng sáng hồng san hô và lam khói, tâm điểm là quả cầu Rin ở màn chào. Sáng/tối đều có token riêng. */
+:root{
+  --bg:#07051c; --glow1:rgba(168,85,247,.32); --glow2:rgba(56,189,248,.22);
+  --panel:rgba(255,255,255,.06); --panel-line:rgba(190,160,255,.18);
+  --fg:#f3f0ff; --muted:#a79fd0;
+  --accent:#b57bff; --accent-2:#4fd1ff; --accent-fg:#12062a;
+  --me:#8b5cf6; --me-fg:#ffffff; --bot:rgba(255,255,255,.07);
+  --err-bg:rgba(255,90,110,.16); --err-fg:#ffa3b1;
+  --code:rgba(0,0,0,.5); --code-fg:#e9e4ff; --online:#5fe3a1; --star:#ffffff;
+  --font:"Be Vietnam Pro","Segoe UI",Roboto,system-ui,sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#f6f3ff; --glow1:rgba(168,120,255,.32); --glow2:rgba(80,190,255,.26);
+  --panel:rgba(255,255,255,.78); --panel-line:rgba(110,70,200,.16);
+  --fg:#241b45; --muted:#74699b;
+  --accent:#7c3aed; --accent-2:#0ea5e9; --accent-fg:#ffffff;
+  --me:#7c3aed; --me-fg:#ffffff; --bot:rgba(255,255,255,.9);
+  --err-bg:#fde3e8; --err-fg:#b3243d; --code:#2a2250; --code-fg:#eeeaff; --online:#1fa971; --star:#7c3aed; color-scheme:light}}
+:root[data-theme="light"]{
+  --bg:#f6f3ff; --glow1:rgba(168,120,255,.32); --glow2:rgba(80,190,255,.26);
+  --panel:rgba(255,255,255,.78); --panel-line:rgba(110,70,200,.16);
+  --fg:#241b45; --muted:#74699b;
+  --accent:#7c3aed; --accent-2:#0ea5e9; --accent-fg:#ffffff;
+  --me:#7c3aed; --me-fg:#ffffff; --bot:rgba(255,255,255,.9);
+  --err-bg:#fde3e8; --err-fg:#b3243d; --code:#2a2250; --code-fg:#eeeaff; --online:#1fa971; --star:#7c3aed; color-scheme:light}
+:root[data-theme="dark"]{--star:#ffffff}
+
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:radial-gradient(520px 420px at 12% -5%,var(--glow1),transparent 70%),radial-gradient(560px 460px at 100% 105%,var(--glow2),transparent 70%),var(--bg);
+  color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.6;display:flex;justify-content:center;
+}
+.app{position:relative;z-index:1;width:100%;max-width:760px;height:100%;display:flex;flex-direction:column;padding-inline:16px}
+
+header{display:flex;align-items:center;gap:12px;padding-block:14px}
+.orb{position:relative;width:42px;height:42px;border-radius:50%;flex:none;background:radial-gradient(circle at 32% 28%,#fff8,transparent 42%),linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 0 26px -2px var(--accent)}
+.dot{position:absolute;right:0;bottom:0;width:11px;height:11px;border-radius:50%;background:var(--online);border:2px solid var(--bg)}
+.who{min-width:0}
+.who b{display:block;font-size:16px;font-weight:600;letter-spacing:.2px}
+.who span{display:block;font-size:12.5px;color:var(--muted)}
+.icon-btn{margin-left:auto;display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--panel-line);color:var(--muted);border-radius:12px;padding:8px 12px;font:inherit;font-size:12.5px;cursor:pointer}
+.icon-btn:hover{color:var(--fg)}
+.icon-btn svg{width:15px;height:15px}
+
+#chat{flex:1;min-height:0;overflow-y:auto;padding-block:10px 18px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
+
+/* màn chào */
+.hello{margin:auto;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding-block:20px}
+.hello .big{width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff9,transparent 40%),linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 0 80px -4px var(--accent),0 0 30px -6px var(--accent-2)}
+.hello h1{font-size:24px;font-weight:700;margin-top:6px;text-wrap:balance}
+.hello p{color:var(--muted);max-width:42ch;text-wrap:balance}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px}
+.chip{background:var(--panel);border:1px solid var(--panel-line);color:var(--fg);border-radius:999px;padding:9px 14px;font:inherit;font-size:13.5px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+
+/* tin nhắn */
+.row{display:flex;gap:10px;align-items:flex-end;min-width:0}
+.row.me{justify-content:flex-end}
+.mini{width:28px;height:28px;border-radius:50%;flex:none;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+.m{max-width:min(86%,560px);min-width:0;padding:11px 15px;border-radius:20px;white-space:pre-wrap;overflow-wrap:anywhere}
+.me .m{background:linear-gradient(135deg,var(--me),var(--accent-2));box-shadow:0 6px 24px -10px var(--accent);color:var(--me-fg);border-bottom-right-radius:6px}
+.bot .m{background:var(--bot);border:1px solid var(--panel-line);border-bottom-left-radius:6px}
+.err{align-self:center;background:var(--err-bg);color:var(--err-fg);font-size:13px;text-align:center;padding:10px 14px;border-radius:14px;max-width:90%}
+.dots{display:inline-flex;gap:5px;padding-block:6px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--muted);opacity:.5}
+pre{background:var(--code);color:var(--code-fg);padding:12px;border-radius:12px;overflow-x:auto;font-size:12.5px;margin-block:8px;white-space:pre;position:relative}
+code{font-family:Consolas,"SF Mono",monospace}
+
+/* ô nhập */
+form{display:flex;align-items:flex-end;gap:8px;margin-block:8px 14px;padding:8px;border-radius:24px;background:var(--panel);border:1px solid var(--panel-line)}
+form:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+textarea{flex:1;min-width:0;resize:none;max-height:130px;padding:9px 10px;border:none;background:transparent;color:var(--fg);font:inherit;outline:none}
+textarea::placeholder{color:var(--muted)}
+.send{flex:none;width:42px;height:42px;border:none;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:var(--accent-fg);display:grid;place-items:center;cursor:pointer}
+.send svg{width:19px;height:19px}
+.send:disabled{opacity:.45;cursor:default}
+.send:focus-visible,.icon-btn:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.foot{text-align:center;font-size:11.5px;color:var(--muted);padding-bottom:6px}
+
+@media (prefers-reduced-motion:no-preference){
+  .row,.err{animation:in .22s ease-out}
+  @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .dots i{animation:bl 1.1s infinite ease-in-out}.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+  @keyframes bl{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+  .hello .big{animation:fl 5s ease-in-out infinite}@keyframes fl{50%{transform:translateY(-6px)}}
+}
+</style>
+<style>html,body{margin:0}</style>
+</head>
+<body>
+
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="app">
+  <header>
+    <div class="orb"><span class="dot"></span></div>
+    <div class="who"><b>Rin</b><span>Luôn ở đây với cậu</span></div>
+    <button class="icon-btn" id="clear" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>
+      <span id="clearLabel">Xoá chat</span>
+    </button>
+  </header>
+
+  <div id="chat" aria-live="polite"></div>
+
+  <form id="f">
+    <textarea id="t" rows="1" placeholder="Nhắn cho Rin..."></textarea>
+    <button class="send" id="s" type="submit" aria-label="Gửi">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    </button>
+  </form>
+  <div class="foot">Rin là AI. Rin luôn muốn cậu có người thật bên cạnh nữa.</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const store = {
+  get(){ try { return JSON.parse(localStorage.getItem("rin_hist") || "[]"); } catch { return []; } },
+  set(v){ try { localStorage.setItem("rin_hist", JSON.stringify(v.slice(-40))); } catch {} }
+};
+let history = store.get();
+let busy = false;
+
+function render(el, text){
+  el.textContent = "";
+  text.split("```").forEach((part, i) => {
+    if (i % 2) {
+      const pre = document.createElement("pre"), code = document.createElement("code");
+      code.textContent = part.replace(/^[a-zA-Z0-9+#-]*\n/, "").replace(/\n$/, "");
+      pre.appendChild(code); el.appendChild(pre);
+    } else if (part) el.appendChild(document.createTextNode(part));
+  });
+}
+function bottom(){ $("chat").scrollTop = $("chat").scrollHeight; }
+function removeHello(){ const h = $("hello"); if (h) h.remove(); }
+
+function addMsg(role, text){
+  removeHello();
+  const row = document.createElement("div");
+  row.className = "row " + (role === "user" ? "me" : "bot");
+  if (role !== "user") { const mini = document.createElement("div"); mini.className = "mini"; row.appendChild(mini); }
+  const m = document.createElement("div"); m.className = "m"; render(m, text);
+  row.appendChild(m); $("chat").appendChild(row); bottom();
+  return m;
+}
+function addTyping(){
+  removeHello();
+  const row = document.createElement("div"); row.className = "row bot";
+  const mini = document.createElement("div"); mini.className = "mini";
+  const m = document.createElement("div"); m.className = "m";
+  m.innerHTML = '<span class="dots"><i></i><i></i><i></i></span>';
+  row.append(mini, m); $("chat").appendChild(row); bottom();
+  return { row, m };
+}
+
+const SUGGEST = ["Hôm nay mình hơi buồn", "Giúp mình viết một tin nhắn", "Giải thích giúp mình một điều", "Kể mình nghe chuyện vui"];
+function showHello(){
+  const d = document.createElement("div"); d.className = "hello"; d.id = "hello";
+  d.innerHTML = '<div class="big"></div><h1>Chào cậu, tôi là Rin</h1><p>Tôi biết cậu là người đã tạo ra tôi. Cậu cứ nhắn tự nhiên: kể chuyện, hỏi gì hay nhờ việc gì cũng được.</p><div class="chips"></div>';
+  SUGGEST.forEach(s => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = s;
+    b.onclick = () => send(s);
+    d.querySelector(".chips").appendChild(b);
+  });
+  $("chat").appendChild(d);
+}
+
+if (history.length) history.forEach(m => addMsg(m.role, m.content)); else showHello();
+
+let sure = false, sureTimer;
+$("clear").onclick = () => {
+  if (sure) {
+    clearTimeout(sureTimer); sure = false; $("clearLabel").textContent = "Xoá chat";
+    history = []; store.set([]); $("chat").textContent = ""; showHello();
+  } else {
+    sure = true; $("clearLabel").textContent = "Bấm lần nữa để xoá";
+    sureTimer = setTimeout(() => { sure = false; $("clearLabel").textContent = "Xoá chat"; }, 3000);
+  }
+};
+
+$("t").addEventListener("input", e => { e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 130) + "px"; });
+$("t").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && window.innerWidth > 700) { e.preventDefault(); $("f").requestSubmit(); } });
+$("f").addEventListener("submit", e => { e.preventDefault(); send($("t").value); });
+
+function buildInput(){
+  const msgs = history.slice(-30).map(m => ({ role: m.role, content: m.content }));
+  if (msgs[0].role !== "user") msgs.shift();
+  return msgs;
+}
+
+async function callApi(){
+  const r = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Access-Code": getCode() },
+    body: JSON.stringify({ messages: buildInput() })
+  });
+  let j = {}; try { j = await r.json(); } catch {}
+  return { status: r.status, j };
+}
+function getCode(){ try { return localStorage.getItem("rin_code") || ""; } catch { return ""; } }
+function setCode(c){ try { localStorage.setItem("rin_code", c); } catch {} }
+
+async function send(raw){
+  const text = (raw || "").trim();
+  if (!text || busy) return;
+  busy = true; $("s").disabled = true;
+  $("t").value = ""; $("t").style.height = "auto";
+  addMsg("user", text);
+  history.push({ role: "user", content: text });
+  const typing = addTyping();
+  try {
+    let res = await callApi();
+    if (res.status === 401) {
+      const c = prompt("Nhập mã truy cập:");
+      if (c) { setCode(c); res = await callApi(); }
+    }
+    if (!res.j.reply) throw { code: res.status === 401 ? "denied" : "server", message: res.j.error };
+    const reply = String(res.j.reply).trim();
+    render(typing.m, reply);
+    history.push({ role: "assistant", content: reply });
+    store.set(history);
+  } catch (err) {
+    history.pop();
+    typing.row.remove();
+    const code = err && err.code;
+    const e = document.createElement("div"); e.className = "err";
+    e.textContent = code === "denied" ? "Sai mã truy cập. Tải lại trang và nhập lại mã nhé."
+      : code === "server" ? (err.message || "Server có lỗi. Cậu thử lại sau nhé.")
+      : "Không kết nối được server. Cậu kiểm tra mạng rồi gửi lại nhé.";
+    $("chat").appendChild(e); bottom();
+  } finally { busy = false; $("s").disabled = false; $("t").focus(); }
+}
+
+/* nền sao lấp lánh */
+(function(){
+  const cv = document.getElementById("stars"); if (!cv) return;
+  const ctx = cv.getContext("2d"); let W = 0, H = 0, stars = [];
+  const still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function colour(){ return getComputedStyle(document.documentElement).getPropertyValue("--star").trim() || "#fff"; }
+  function resize(){
+    const d = Math.min(window.devicePixelRatio || 1, 2);
+    W = cv.clientWidth; H = cv.clientHeight; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0);
+    const n = Math.round(W * H / 9000);
+    stars = Array.from({ length: n }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.4 + .3, p: Math.random() * 6.28, s: Math.random() * .02 + .005 }));
+  }
+  function draw(){
+    ctx.clearRect(0, 0, W, H); ctx.fillStyle = colour();
+    for (const t of stars) {
+      t.p += t.s; ctx.globalAlpha = .25 + .65 * (.5 + .5 * Math.sin(t.p));
+      ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, 6.283); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    if (!still) requestAnimationFrame(draw);
+  }
+  addEventListener("resize", () => { resize(); if (still) draw(); });
+  resize(); draw();
+})();
+</script>
+
+</body>
+</html>
