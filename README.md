@@ -1,1 +1,1 @@
-# AI-CODE
+AI CODE LÀ 1 AI TÔI ĐANG TEST CÁC BẠN CÓ THỂ SÀI
