@@ -7,6 +7,8 @@ Trợ lý AI chạy hoàn toàn trên trình duyệt. Chỉ có một file `inde
 1. Lấy key Gemini miễn phí ở https://aistudio.google.com (Get API key).
 2. Mở trang, nhắn một tin. Trang sẽ hỏi key, key chỉ lưu trong trình duyệt của bạn.
 3. Nút **Cài đặt** để đổi key hoặc tên model khi cần.
+4. Nút kẹp giấy để đính kèm ảnh, PDF, âm thanh, văn bản hoặc code. Nhờ Rin sửa file văn bản/code rồi bấm **Tải về** ở khối code.
+5. Nút micro để nói, nút **Đọc to** để Rin đọc câu trả lời. Bật Đọc to thì nói xong sẽ tự gửi.
 
 ## Đưa lên web bằng GitHub Pages
 

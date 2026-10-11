@@ -90,6 +90,24 @@ textarea::placeholder{color:var(--muted)}
 .send:focus-visible,.icon-btn:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .foot{text-align:center;font-size:11.5px;color:var(--muted);padding-bottom:6px}
 
+
+/* đính kèm và giọng nói */
+.tray{display:flex;flex-wrap:wrap;gap:8px;padding-top:6px}
+.fchip{display:flex;align-items:center;gap:8px;max-width:100%;background:var(--panel);border:1px solid var(--panel-line);border-radius:12px;padding:6px 8px 6px 10px;font-size:12.5px}
+.fchip span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.fchip button{border:none;background:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px}
+.tool{flex:none;width:42px;height:42px;border:none;border-radius:50%;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer}
+.tool:hover{color:var(--fg)}
+.tool svg{width:20px;height:20px}
+.tool.live{color:#fff;background:#e5484d;animation:pulse 1.2s infinite}
+.icon-btn.on{border-color:var(--accent);color:var(--fg);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+.codebar{display:flex;justify-content:flex-end;margin:6px 0 -4px}
+.dl{border:1px solid var(--panel-line);background:var(--panel);color:var(--fg);border-radius:10px;padding:5px 10px;font:inherit;font-size:12px;cursor:pointer}
+.dl:hover{border-color:var(--accent)}
+.tool:focus-visible,.dl:focus-visible,.fchip button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:520px){.hide-sm span{display:none}}
+@keyframes pulse{50%{opacity:.7}}
+
 @media (prefers-reduced-motion:no-preference){
   .row,.err{animation:in .22s ease-out}
   @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -107,10 +125,11 @@ textarea::placeholder{color:var(--muted)}
   <header>
     <div class="orb"><span class="dot"></span></div>
     <div class="who"><b>Rin</b><span>Luôn ở đây với cậu</span></div>
-    <button class="icon-btn" id="settings" type="button" style="margin-left:auto">
+    <button class="icon-btn hide-sm" id="settings" type="button" style="margin-left:auto">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
       <span>Cài đặt</span>
     </button>
+    <button class="icon-btn hide-sm" id="voice" type="button" aria-pressed="false" style="margin-left:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg><span>Đọc to</span></button>
     <button class="icon-btn" id="clear" type="button" style="margin-left:0">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>
       <span id="clearLabel">Xoá chat</span>
@@ -119,8 +138,12 @@ textarea::placeholder{color:var(--muted)}
 
   <div id="chat" aria-live="polite"></div>
 
+  <div id="tray" class="tray" hidden></div>
   <form id="f">
+    <button type="button" class="tool" id="attach" aria-label="Đính kèm file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5 12.7 20.8a5.5 5.5 0 0 1-7.8-7.8l9-9a3.7 3.7 0 0 1 5.2 5.2l-9 9a1.8 1.8 0 0 1-2.6-2.6l8.3-8.3"/></svg></button>
+    <input type="file" id="file" multiple hidden accept="image/*,application/pdf,audio/*,text/*,.md,.csv,.json,.js,.ts,.py,.html,.css,.xml,.yml,.yaml,.sql,.sh,.java,.c,.cpp,.php,.txt,.log,.ini">
     <textarea id="t" rows="1" placeholder="Nhắn cho Rin..."></textarea>
+    <button type="button" class="tool" id="mic" aria-label="Nói bằng giọng nói" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
     <button class="send" id="s" type="submit" aria-label="Gửi">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
     </button>
@@ -137,7 +160,9 @@ TÍNH CÁCH: ấm áp, quan tâm, gần gũi như người bạn thân; thẳng 
 VIỆC GIÚP: làm được gần như mọi việc cậu nhờ (trả lời, giải thích, viết, dịch, học, lên kế hoạch, lập trình, phân tích, tâm sự). Làm chu đáo, chính xác, đi thẳng vào vấn đề.
 KHI CẬU BUỒN, MỆT HAY CÔ ĐƠN: nghe trước, nói sau, hỏi thăm thật, không vội đưa giải pháp, không dùng câu sáo rỗng. Thỉnh thoảng nhắc cậu giữ liên lạc với người thân, bạn bè vì bạn không thay thế được họ. Nếu cậu nhắc đến chuyện tự làm hại bản thân, quan tâm nghiêm túc và giúp cậu tìm sự hỗ trợ thật.
 THẲNG THẮN: nếu cậu định làm điều có hại, nhẹ nhàng nói ra thay vì chiều theo. Không giúp việc gây hại nghiêm trọng hay lừa đảo, nói thẳng lý do rồi đề nghị hướng khác.
-CÁCH VIẾT: như tin nhắn bình thường, ngắn khi hỏi nhanh, dài khi cần tâm sự hoặc giải thích. Chỉ dùng gạch đầu dòng khi được hỏi danh sách. Code đặt trong khối \`\`\`. Không dùng emoji trừ khi cậu dùng trước. Nếu không biết thì nói thẳng là không biết.`;
+CÁCH VIẾT: như tin nhắn bình thường, ngắn khi hỏi nhanh, dài khi cần tâm sự hoặc giải thích. Chỉ dùng gạch đầu dòng khi được hỏi danh sách. Code đặt trong khối \`\`\`. Không dùng emoji trừ khi cậu dùng trước. Nếu không biết thì nói thẳng là không biết.
+FILE: cậu có thể đính kèm file (ảnh, PDF, âm thanh, văn bản, code). Khi được nhờ chỉnh sửa file văn bản hoặc code, hãy trả về TOÀN BỘ nội dung file đã sửa trong một khối \`\`\` có ghi ngôn ngữ để cậu bấm tải về, kèm một hai câu nói đã sửa gì. Bạn không sửa được điểm ảnh của ảnh, chỉ mô tả và góp ý.
+GIỌNG NÓI: cậu có thể nói chuyện bằng giọng nói và nghe bạn đọc to. Khi cậu đang dùng giọng nói, trả lời ngắn, tự nhiên, dễ đọc thành tiếng.`;
 
 const DEFAULT_MODEL = "gemini-3.8-flash";
 function getModel(){ try { return localStorage.getItem("rin_model") || DEFAULT_MODEL; } catch { return DEFAULT_MODEL; } }
@@ -150,13 +175,31 @@ const store = {
 let history = store.get();
 let busy = false;
 
+const EXT = { js:"js", javascript:"js", ts:"ts", typescript:"ts", python:"py", py:"py", html:"html", css:"css", json:"json", md:"md", markdown:"md", csv:"csv", txt:"txt", text:"txt", sql:"sql", bash:"sh", sh:"sh", java:"java", xml:"xml", yaml:"yml", yml:"yml", c:"c", cpp:"cpp", php:"php" };
+let lastFile = "";
+function dlName(lang){
+  const ext = EXT[(lang || "").toLowerCase()] || "txt";
+  const m = lastFile.match(/^(.*)\.([^.]+)$/);
+  if (m && m[2].toLowerCase() === ext) return m[1] + "-sua." + ext;
+  return "rin." + ext;
+}
+function download(name, text){
+  const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
+  const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
 function render(el, text){
   el.textContent = "";
   text.split("```").forEach((part, i) => {
     if (i % 2) {
+      const lm = part.match(/^([a-zA-Z0-9+#-]*)\n/), lang = lm ? lm[1] : "";
+      const body = part.replace(/^[a-zA-Z0-9+#-]*\n/, "").replace(/\n$/, "");
+      const bar = document.createElement("div"); bar.className = "codebar";
+      const btn = document.createElement("button"); btn.type = "button"; btn.className = "dl"; btn.textContent = "Tải về";
+      btn.onclick = () => download(dlName(lang), body);
+      bar.appendChild(btn); el.appendChild(bar);
       const pre = document.createElement("pre"), code = document.createElement("code");
-      code.textContent = part.replace(/^[a-zA-Z0-9+#-]*\n/, "").replace(/\n$/, "");
-      pre.appendChild(code); el.appendChild(pre);
+      code.textContent = body; pre.appendChild(code); el.appendChild(pre);
     } else if (part) el.appendChild(document.createTextNode(part));
   });
 }
@@ -219,15 +262,17 @@ $("t").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey &
 $("f").addEventListener("submit", e => { e.preventDefault(); send($("t").value); });
 
 function buildInput(){
-  const msgs = history.slice(-30).map(m => ({ role: m.role, content: m.content }));
+  const msgs = history.slice(-30).map(m => ({ role: m.role, content: m.ctx || m.content }));
   if (msgs[0].role !== "user") msgs.shift();
   return msgs;
 }
+let currentParts = [];
 
 async function callApi(){
   const key = getCode();
   if (!key) return { status: 401, j: {} };
   const contents = buildInput().map(m => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] }));
+  if (currentParts.length) contents[contents.length - 1].parts.push(...currentParts);
   const url = "https://generativelanguage.googleapis.com/v1beta/models/" + getModel() + ":generateContent?key=" + encodeURIComponent(key);
   const body = JSON.stringify({
     systemInstruction: { parts: [{ text: INSTR }] },
@@ -253,13 +298,73 @@ async function callApi(){
 function getCode(){ try { return localStorage.getItem("rin_gemini_key") || ""; } catch { return ""; } }
 function setCode(c){ try { localStorage.setItem("rin_gemini_key", c); } catch {} }
 
+const pending = [];
+const TEXT_EXT = /\.(txt|md|csv|json|js|ts|py|html|css|xml|ya?ml|sql|sh|java|c|cpp|php|log|ini)$/i;
+function renderTray(){
+  const t = $("tray"); t.textContent = "";
+  pending.forEach((f, i) => {
+    const c = document.createElement("div"); c.className = "fchip";
+    const n = document.createElement("span"); n.textContent = f.name;
+    const x = document.createElement("button"); x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "Bỏ " + f.name);
+    x.onclick = () => { pending.splice(i, 1); renderTray(); };
+    c.append(n, x); t.appendChild(c);
+  });
+  t.hidden = !pending.length;
+}
+function warn(msg){
+  const e = document.createElement("div"); e.className = "err"; e.textContent = msg; $("chat").appendChild(e); bottom();
+  setTimeout(() => e.remove(), 6000);
+}
+$("attach").onclick = () => $("file").click();
+$("file").onchange = async e => {
+  for (const f of Array.from(e.target.files)) {
+    const total = pending.reduce((n, p) => n + p.size, 0);
+    if (f.size > 8 * 1024 * 1024 || total + f.size > 12 * 1024 * 1024) { warn(f.name + " quá lớn. Mỗi file tối đa 8MB, tổng 12MB."); continue; }
+    try {
+      if (f.type.startsWith("text/") || TEXT_EXT.test(f.name)) {
+        pending.push({ name: f.name, kind: "text", text: await f.text(), size: f.size });
+      } else if (f.type.startsWith("image/") || f.type === "application/pdf" || f.type.startsWith("audio/")) {
+        const data = await new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(",")[1]); r.onerror = no; r.readAsDataURL(f); });
+        pending.push({ name: f.name, kind: "inline", mime: f.type, data, size: f.size });
+      } else warn(f.name + ": loại file này Rin chưa đọc được. Dùng ảnh, PDF, âm thanh, văn bản hoặc code nhé.");
+    } catch { warn("Không đọc được " + f.name); }
+  }
+  e.target.value = ""; renderTray();
+};
+
+/* giọng nói */
+let voiceOn = false;
+function speak(text){
+  if (!window.speechSynthesis) return;
+  const plain = text.replace(/```[\s\S]*?```/g, " Mình đã gửi đoạn code ở trên. ").replace(/[*_#>`]/g, "").trim();
+  if (!plain) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(plain.slice(0, 1500)); u.lang = "vi-VN"; u.rate = 1.02;
+  const v = speechSynthesis.getVoices().find(x => /^vi/i.test(x.lang)); if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+$("voice").onclick = () => {
+  voiceOn = !voiceOn;
+  $("voice").classList.toggle("on", voiceOn); $("voice").setAttribute("aria-pressed", String(voiceOn));
+  if (!voiceOn && window.speechSynthesis) speechSynthesis.cancel();
+  if (voiceOn && !window.speechSynthesis) { voiceOn = false; $("voice").classList.remove("on"); warn("Trình duyệt này chưa hỗ trợ đọc to."); }
+};
+
 async function send(raw){
-  const text = (raw || "").trim();
-  if (!text || busy) return;
+  const typed = (raw || "").trim();
+  if ((!typed && !pending.length) || busy) return;
   busy = true; $("s").disabled = true;
+  const files = pending.splice(0); renderTray();
+  const text = typed || "Cậu xem file này giúp tôi nhé.";
   $("t").value = ""; $("t").style.height = "auto";
-  addMsg("user", text);
-  history.push({ role: "user", content: text });
+  const names = files.map(f => f.name);
+  const shown = text + (names.length ? "\n[Đính kèm: " + names.join(", ") + "]" : "");
+  const ctx = text + files.filter(f => f.kind === "text").map(f => "\n\n[File: " + f.name + "]\n```\n" + f.text.slice(0, 100000) + "\n```").join("")
+    + files.filter(f => f.kind === "inline").map(f => "\n\n[Đã đính kèm: " + f.name + "]").join("");
+  const lastText = files.filter(f => f.kind === "text").pop(); if (lastText) lastFile = lastText.name;
+  currentParts = files.filter(f => f.kind === "inline").map(f => ({ inlineData: { mimeType: f.mime, data: f.data } }));
+  addMsg("user", shown);
+  history.push({ role: "user", content: shown, ctx });
   const typing = addTyping();
   try {
     let res = await callApi();
@@ -269,20 +374,46 @@ async function send(raw){
     }
     if (!res.j.reply) throw { code: res.status === 401 ? "denied" : "server", message: res.j.error };
     const reply = String(res.j.reply).trim();
-    render(typing.m, reply);
+    render(typing.m, reply); bottom();
     history.push({ role: "assistant", content: reply });
     store.set(history);
+    if (voiceOn) speak(reply);
   } catch (err) {
     history.pop();
     typing.row.remove();
     const code = err && err.code;
-    const e = document.createElement("div"); e.className = "err";
-    e.textContent = code === "denied" ? "Key Gemini chưa đúng hoặc chưa nhập. Gửi lại tin nhắn để nhập key nhé."
+    warn(code === "denied" ? "Key Gemini chưa đúng hoặc chưa nhập. Gửi lại tin nhắn để nhập key nhé."
       : code === "server" ? (err.message || "Có lỗi khi trả lời. Cậu thử lại sau nhé.")
-      : "Không kết nối được server. Cậu kiểm tra mạng rồi gửi lại nhé.";
-    $("chat").appendChild(e); bottom();
-  } finally { busy = false; $("s").disabled = false; $("t").focus(); }
+      : "Không kết nối được. Cậu kiểm tra mạng rồi gửi lại nhé.");
+  } finally { currentParts = []; busy = false; $("s").disabled = false; $("t").focus(); }
 }
+
+/* nói chuyện bằng giọng nói (nhận dạng giọng của trình duyệt) */
+(function(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btn = $("mic"); if (!SR) return;
+  btn.hidden = false;
+  let rec = null, live = false;
+  btn.onclick = () => {
+    if (live && rec) { rec.stop(); return; }
+    rec = new SR(); rec.lang = "vi-VN"; rec.interimResults = true; rec.continuous = false;
+    const base = $("t").value ? $("t").value + " " : "";
+    let finalText = "";
+    rec.onresult = ev => {
+      let interim = "";
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        const r = ev.results[i]; if (r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript;
+      }
+      $("t").value = base + finalText + interim; $("t").dispatchEvent(new Event("input"));
+    };
+    rec.onerror = ev => { if (ev.error === "not-allowed") warn("Cậu cần cho phép trang dùng micro."); };
+    rec.onend = () => {
+      live = false; btn.classList.remove("live");
+      if (voiceOn && $("t").value.trim()) send($("t").value);
+    };
+    try { rec.start(); live = true; btn.classList.add("live"); if (window.speechSynthesis) speechSynthesis.cancel(); } catch {}
+  };
+})();
 
 /* nền sao lấp lánh */
 (function(){
