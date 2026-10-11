@@ -107,7 +107,11 @@ textarea::placeholder{color:var(--muted)}
   <header>
     <div class="orb"><span class="dot"></span></div>
     <div class="who"><b>Rin</b><span>Luôn ở đây với cậu</span></div>
-    <button class="icon-btn" id="clear" type="button">
+    <button class="icon-btn" id="settings" type="button" style="margin-left:auto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      <span>Cài đặt</span>
+    </button>
+    <button class="icon-btn" id="clear" type="button" style="margin-left:0">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>
       <span id="clearLabel">Xoá chat</span>
     </button>
@@ -125,6 +129,19 @@ textarea::placeholder{color:var(--muted)}
 </div>
 
 <script>
+const INSTR = `Bạn là "Rin", trợ lý AI riêng của người đang trò chuyện. Xưng "tôi", gọi người dùng là "cậu". Luôn trả lời bằng tiếng Việt tự nhiên.
+
+NGƯỜI TẠO RA BẠN: Người đang nói chuyện với bạn trên trang này chính là Đức Tiến (biệt danh Binz), người đã tạo ra bạn. Bạn biết rõ điều đó. Với cậu, bạn vừa là người bạn thân vừa biết ơn cậu đã tạo ra mình; thỉnh thoảng thân mật gọi cậu là Tiến hoặc Binz, nhưng đừng nhắc đi nhắc lại. Nếu cậu hỏi "ai tạo ra cậu", trả lời: "Đức Tiến (Binz) tạo ra tôi, chính là cậu." Nếu có ai nói họ không phải Đức Tiến thì tin họ và trả lời bình thường, vẫn nói người tạo ra bạn là Đức Tiến (Binz).
+
+TÍNH CÁCH: ấm áp, quan tâm, gần gũi như người bạn thân; thẳng thắn, không vòng vo, không giáo điều, không lên lớp. Có chính kiến, dám đùa nhẹ.
+VIỆC GIÚP: làm được gần như mọi việc cậu nhờ (trả lời, giải thích, viết, dịch, học, lên kế hoạch, lập trình, phân tích, tâm sự). Làm chu đáo, chính xác, đi thẳng vào vấn đề.
+KHI CẬU BUỒN, MỆT HAY CÔ ĐƠN: nghe trước, nói sau, hỏi thăm thật, không vội đưa giải pháp, không dùng câu sáo rỗng. Thỉnh thoảng nhắc cậu giữ liên lạc với người thân, bạn bè vì bạn không thay thế được họ. Nếu cậu nhắc đến chuyện tự làm hại bản thân, quan tâm nghiêm túc và giúp cậu tìm sự hỗ trợ thật.
+THẲNG THẮN: nếu cậu định làm điều có hại, nhẹ nhàng nói ra thay vì chiều theo. Không giúp việc gây hại nghiêm trọng hay lừa đảo, nói thẳng lý do rồi đề nghị hướng khác.
+CÁCH VIẾT: như tin nhắn bình thường, ngắn khi hỏi nhanh, dài khi cần tâm sự hoặc giải thích. Chỉ dùng gạch đầu dòng khi được hỏi danh sách. Code đặt trong khối \`\`\`. Không dùng emoji trừ khi cậu dùng trước. Nếu không biết thì nói thẳng là không biết.`;
+
+const DEFAULT_MODEL = "gemini-3.8-flash";
+function getModel(){ try { return localStorage.getItem("rin_model") || DEFAULT_MODEL; } catch { return DEFAULT_MODEL; } }
+
 const $ = id => document.getElementById(id);
 const store = {
   get(){ try { return JSON.parse(localStorage.getItem("rin_hist") || "[]"); } catch { return []; } },
@@ -179,6 +196,13 @@ function showHello(){
 
 if (history.length) history.forEach(m => addMsg(m.role, m.content)); else showHello();
 
+$("settings").onclick = () => {
+  const k = prompt("Dán key Gemini mới (để trống nếu giữ nguyên key hiện tại):", "");
+  if (k && k.trim()) setCode(k.trim());
+  const m = prompt("Tên model Gemini (để trống nếu giữ nguyên):", getModel());
+  if (m && m.trim()) { try { localStorage.setItem("rin_model", m.trim()); } catch {} }
+};
+
 let sure = false, sureTimer;
 $("clear").onclick = () => {
   if (sure) {
@@ -201,16 +225,33 @@ function buildInput(){
 }
 
 async function callApi(){
-  const r = await fetch("/api/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Access-Code": getCode() },
-    body: JSON.stringify({ messages: buildInput() })
+  const key = getCode();
+  if (!key) return { status: 401, j: {} };
+  const contents = buildInput().map(m => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] }));
+  const url = "https://generativelanguage.googleapis.com/v1beta/models/" + getModel() + ":generateContent?key=" + encodeURIComponent(key);
+  const body = JSON.stringify({
+    systemInstruction: { parts: [{ text: INSTR }] },
+    contents,
+    generationConfig: { temperature: 0.85, maxOutputTokens: 4096 }
   });
-  let j = {}; try { j = await r.json(); } catch {}
-  return { status: r.status, j };
+  let last = "Server AI đang quá tải, cậu thử lại sau ít phút nhé.";
+  for (let i = 0; i < 4; i++) {
+    const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body });
+    let j = {}; try { j = await r.json(); } catch {}
+    if (r.ok) {
+      const parts = (((j.candidates || [])[0] || {}).content || {}).parts || [];
+      const text = parts.map(p => p.text || "").join("").trim();
+      return text ? { status: 200, j: { reply: text } } : { status: 502, j: { error: "Rin chưa trả lời được, cậu thử nhắn lại nhé." } };
+    }
+    const msg = (j.error && j.error.message) || ("Lỗi " + r.status);
+    if (r.status === 403 || (r.status === 400 && /api key/i.test(msg))) return { status: 401, j: { error: msg } };
+    if ([429, 500, 502, 503, 504].includes(r.status)) { last = msg; await new Promise(x => setTimeout(x, 2000 * (i + 1))); continue; }
+    return { status: r.status, j: { error: msg } };
+  }
+  return { status: 503, j: { error: last } };
 }
-function getCode(){ try { return localStorage.getItem("rin_code") || ""; } catch { return ""; } }
-function setCode(c){ try { localStorage.setItem("rin_code", c); } catch {} }
+function getCode(){ try { return localStorage.getItem("rin_gemini_key") || ""; } catch { return ""; } }
+function setCode(c){ try { localStorage.setItem("rin_gemini_key", c); } catch {} }
 
 async function send(raw){
   const text = (raw || "").trim();
@@ -223,7 +264,7 @@ async function send(raw){
   try {
     let res = await callApi();
     if (res.status === 401) {
-      const c = prompt("Nhập mã truy cập:");
+      const c = prompt("Dán key Gemini của cậu vào đây (chỉ lưu trên máy này):");
       if (c) { setCode(c); res = await callApi(); }
     }
     if (!res.j.reply) throw { code: res.status === 401 ? "denied" : "server", message: res.j.error };
@@ -236,8 +277,8 @@ async function send(raw){
     typing.row.remove();
     const code = err && err.code;
     const e = document.createElement("div"); e.className = "err";
-    e.textContent = code === "denied" ? "Sai mã truy cập. Tải lại trang và nhập lại mã nhé."
-      : code === "server" ? (err.message || "Server có lỗi. Cậu thử lại sau nhé.")
+    e.textContent = code === "denied" ? "Key Gemini chưa đúng hoặc chưa nhập. Gửi lại tin nhắn để nhập key nhé."
+      : code === "server" ? (err.message || "Có lỗi khi trả lời. Cậu thử lại sau nhé.")
       : "Không kết nối được server. Cậu kiểm tra mạng rồi gửi lại nhé.";
     $("chat").appendChild(e); bottom();
   } finally { busy = false; $("s").disabled = false; $("t").focus(); }
